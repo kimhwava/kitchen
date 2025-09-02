@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบจัดการเมนูอาหาร</title>
+  <meta name="description" content="ระบบจัดการเมนูอาหารและวัตถุดิบสำหรับร้านอาหาร รองรับการคำนวณต้นทุน ผูกวัตถุดิบกับเมนู ค้นหาได้ง่าย พร้อมโหมดกลางคืนและใช้งานบนมือถือได้สะดวก">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2a9d8f">
+
+
+</head>
+<body>
+
+<header>
+  <div class="nav-container">
+    <div class="logo">🍽️ Nonlapong</div>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <nav id="mobileMenu" class="mobile-nav">
+      <a href="#menu-section">📋 เมนู</a>
+      <a href="#ingredient-section">🥦 วัตถุดิบ</a>
+      <a href="#contact">📞 ติดต่อเรา</a>
+    </nav>
+  </div>
+  <h1>📋 ระบบจัดการเมนูอาหาร</h1>
+  <button onclick="toggleDarkMode()">🌙 สลับโหมดกลางคืน</button>
+</header>
+
+<div id="toast" class="toast"></div>
+
+<main>
+  <section>
+    <h2>➕ เพิ่มเมนู</h2>
+    <form action="/add_menu" method="POST" onsubmit="return confirmAdd('เมนู')">
+      <input type="text" name="name" placeholder="ชื่อเมนู" required>
+      <input type="number" step="0.01" name="price" placeholder="ราคาขาย" required>
+      <button type="submit" class="btn-add">เพิ่มเมนู</button>
+    </form>
+  </section>
+
+  <section id="menu-section">
+    <h2>🔎 ฟิลเตอร์เมนู</h2>
+    <input type="text" id="searchMenu" placeholder="ค้นหาชื่อเมนู..." onkeyup="filterMenu()">
+    <input type="number" id="minPrice" placeholder="ราคาต่ำสุด" oninput="filterMenu()">
+    <input type="number" id="maxPrice" placeholder="ราคาสูงสุด" oninput="filterMenu()">
+    <ul id="menuList">
+      {% for menu in menus %}
+        <li class="menu-item" data-price="{{ menu.price }}">
+          <span class="menu-name"><strong>{{ menu.name }}</strong></span> - {{ menu.price }} บาท
+          <br>ต้นทุน: {{ menu.cost }} บาท | กำไร: {{ (menu.price - menu.cost)|round(2) }} บาท
+
+          <form action="/edit_menu" method="POST" class="inline" onsubmit="showToast('แก้ไขเมนูสำเร็จ ✅')">
+            <input type="hidden" name="menu_id" value="{{ menu.id }}">
+            <input type="text" name="new_name" value="{{ menu.name }}" required>
+            <input type="number" step="0.01" name="new_price" value="{{ menu.price }}" required>
+            <button type="submit" class="btn-edit">แก้ไขเมนู</button>
+          </form>
+
+          <form action="/delete_menu" method="POST" class="inline" onsubmit="return confirmDelete('เมนู')">
+            <input type="hidden" name="menu_id" value="{{ menu.id }}">
+            <button type="submit" class="btn-delete">ลบเมนู</button>
+          </form>
+
+          {% if menu.ingredients %}
+          <details>
+            <summary>วัตถุดิบที่ใช้</summary>
+            <ul>
+              {% for ing in menu.ingredients %}
+              <li>
+                {{ ing[1] }} ({{ ing[2] }}) × {{ ing[3] }} = {{ (ing[3] * ing[4])|round(2) }} บาท
+                <form action="/update_quantity" method="POST" class="inline" onsubmit="showToast('แก้ไขปริมาณสำเร็จ ✅')">
+                  <input type="hidden" name="menu_id" value="{{ menu.id }}">
+                  <input type="hidden" name="ingredient_id" value="{{ ing[0] }}">
+                  <input type="number" step="0.01" name="new_quantity" value="{{ ing[3] }}" style="width:60px;">
+                  <button type="submit" class="btn-edit">แก้ไข</button>
+                </form>
+                <form action="/remove_ingredient" method="POST" class="inline" onsubmit="return confirmDelete('วัตถุดิบในเมนู')">
+                  <input type="hidden" name="menu_id" value="{{ menu.id }}">
+                  <input type="hidden" name="ingredient_id" value="{{ ing[0] }}">
+                  <button type="submit" class="btn-delete">ลบ</button>
+                </form>
+              </li>
+              {% endfor %}
+            </ul>
+          </details>
+          {% else %}
+          <p><em>ยังไม่มีวัตถุดิบผูกไว้</em></p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <button id="toggleMenuBtn" class="sticky-toggle-btn" onclick="toggleMenuList()">ดูเพิ่มเติม</button>
+  </section>
+
+  <section>
+    <h2>🥦 เพิ่มวัตถุดิบ</h2>
+    <form action="/add_ingredient" method="POST" onsubmit="return confirmAdd('วัตถุดิบ')">
+      <input type="text" name="name" placeholder="ชื่อวัตถุดิบ" required>
+      <select name="unit" id="unitSelect" required>
+        <option value="">-- เลือกหน่วย --</option>
+        <option value="g">100 กรัม (g)</option>
+        <option value="kg">1 กิโลกรัม (kg)</option>
+        <option value="ml">100 มิลลิลิตร (ml)</option>
+        <option value="L">1 ลิตร (L)</option>
+        <option value="pcs">1 ชิ้น</option>
+        <option value="pack">1 แพ็ค</option>
+        <option value="tbsp">1 ช้อนโต๊ะ</option>
+        <option value="tsp">1 ช้อนชา</option>
+        <option value="cup">1 ถ้วย</option>
+      </select>
+      <input type="number" step="0.01" name="price" placeholder="ราคาต่อหน่วย" required>
+      <button type="submit" class="btn-add">เพิ่มวัตถุดิบ</button>
+    </form>
+  </section>
+
+  <section>
+  <h2>🔗 ผูกวัตถุดิบเข้ากับเมนู</h2>
+  <form id="assignIngredientForm" action="/assign_ingredient" method="POST" onsubmit="showToast('ผูกวัตถุดิบสำเร็จ ✅')">
+    <select name="menu_id" id="menuSelect" required>
+      <option value="">เลือกเมนู</option>
+      {% for menu in menus %}
+      <option value="{{ menu.id }}">{{ menu.name }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="ingredient_id" id="ingredientSelect" required>
+      <option value="">เลือกวัตถุดิบ</option>
+      {% for ing in ingredients %}
+      <option value="{{ ing[0] }}">{{ ing[1] }} ({{ ing[2] }})</option>
+      {% endfor %}
+    </select>
+
+    <input type="number" step="0.01" name="quantity" placeholder="ปริมาณที่ใช้" required>
+    <button type="submit" class="btn-add">ผูกวัตถุดิบ</button>
+  </form>
+</section>
+
+
+  <section id="ingredient-section">
+    <h2>📦 วัตถุดิบทั้งหมด</h2>
+    <input type="text" id="searchIngredient" placeholder="ค้นหาวัตถุดิบ..." onkeyup="filterIngredient()">
+    <ul id="ingredientList">
+      {% for ing in ingredients %}
+      <li class="ingredient-item">
+        <span class="ingredient-name">{{ ing[1] }}</span> ({{ ing[2] }}) - {{ ing[3] }} บาท
+        <form action="/edit_ingredient" method="POST" class="inline" onsubmit="showToast('แก้ไขวัตถุดิบสำเร็จ ✅')">
+          <input type="hidden" name="ingredient_id" value="{{ ing[0] }}">
+          <input type="text" name="new_name" value="{{ ing[1] }}" required>
+          <input type="text" name="new_unit" value="{{ ing[2] }}">
+          <input type="number" step="0.01" name="new_price" value="{{ ing[3] }}" required>
+          <button type="submit" class="btn-edit">แก้ไข</button>
+        </form>
+        <form action="/delete_ingredient" method="POST" class="inline" onsubmit="return confirmDelete('วัตถุดิบ')">
+          <input type="hidden" name="ingredient_id" value="{{ ing[0] }}">
+          <button type="submit" class="btn-delete">ลบ</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <button id="toggleIngredientBtn" class="sticky-toggle-btn" onclick="toggleIngredientList()">ดูเพิ่มเติม</button>
+  </section>
+
+  <section id="contact">
+    <h2>📞 ติดต่อเรา</h2>
+    <p>โทร: 012-345-6789<br>อีเมล: info@nonlapong.com</p>
+   
+  </section>
+</main>
+
+<footer class="foorpad">
+   <p>© 2025 ร้านอาหาร Nonlapong - พัฒนาโดยคุณ</p>
+ <br>
+
+<div class="sticky-footer-nav">
+<button onclick="document.getElementById('menu-section').scrollIntoView({behavior:'smooth'})">📋 เพิ่มเมนู</button>
+  <button onclick="document.getElementById('ingredient-section').scrollIntoView({behavior:'smooth'})">🥦 เพิ่มวัตถุดิบ</button>
+  <button onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">📞 ติดต่อ</button>
+
+</div>
+
+</footer>
+
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>
