@@ -263,3 +263,46 @@ input[type="number"] { width: 6rem; }
 .line {
   margin-bottom: 1rem;
 }
+
+
+.intro {
+  text-align: center;
+  padding: 2rem 1rem;
+  max-width: 800px;
+  margin: auto;
+}
+
+.intro h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.intro-desc {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+
+.alert-box {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 0.75rem 1rem;
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.version-tag {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.version-tag a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.version-tag a:hover {
+  color: #000;
+}

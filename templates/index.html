@@ -20,7 +20,12 @@
 
 <header>
   <div class="nav-container">
-    <div class="logo">🍽️ Nonlapong</div>
+    <div class="logo">
+  🍽️ <a href="https://kawkong.net" target="_blank" style="text-decoration:none; color:inherit;">
+    ข้าวกล่องดอทเน็ต
+  </a>
+</div>
+
     <div class="hamburger" onclick="toggleMenu()">☰</div>
     <nav id="mobileMenu" class="mobile-nav">
       <a href="#menu-section">📋 เมนู</a>
@@ -28,19 +33,43 @@
       <a href="#contact">📞 ติดต่อเรา</a>
     </nav>
   </div>
-  <h1>📋 ระบบจัดการเมนูอาหาร</h1>
   <button onclick="toggleDarkMode()">🌙 สลับโหมดกลางคืน</button>
 </header>
 
 <div id="toast" class="toast"></div>
 
 <main>
-  <section>
-    <p style="color:#b00; font-weight:bold;">
-  !! หมายเหตุ: ราคาและส่วนผสมที่แสดงเป็นเพียงเพื่อการสาธิตเท่านั้น และไม่สะท้อนถึงมูลค่าที่แท้จริง<br>
-  !! Note: Prices and ingredients shown are for demonstration purposes only and do not reflect actual value.
-</p>
 
+  <!-- Intro Section -->
+<section class="intro">
+  <h1>📋 ระบบจัดการเมนูอาหาร</h1>
+  <p class="intro-desc">
+    ระบบจัดการร้านอาหารแบบครบวงจร — เพิ่มเมนู ผูกวัตถุดิบ และคำนวณต้นทุนอาหารอัตโนมัติ  
+    รองรับการค้นหาเมนูและจัดการวัตถุดิบได้ง่ายในที่เดียว
+  </p>
+
+  <!-- Alert Box -->
+  <div class="alert-box">
+    <strong>!! หมายเหตุ:</strong> ข้อมูลราคาและส่วนผสมในหน้านี้เป็นเพียงตัวอย่างเพื่อการสาธิตเท่านั้น  
+    <br>
+    <strong>!! Note:</strong> Prices and ingredients shown are for demonstration purposes only and do not reflect actual value.
+  </div>
+
+  <!-- Version Tag -->
+  <p class="version-tag">
+    BETA • 
+    <a href="https://github.com/kimhwava/kitchen" target="_blank" rel="noopener noreferrer">
+      Open Source Dev
+    </a> • ©2025 — 
+    <a href="https://kawkong.net" target="_blank" title="ข้าวกล่องดอทเน็ต">
+      ข้าวกล่องดอทเน็ต
+    </a>
+  </p>
+</section>
+
+
+  <section>
+  
     <h2>➕ เพิ่มเมนู</h2>
     <form action="/add_menu" method="POST" onsubmit="return confirmAdd('เมนู')">
       <input type="text" name="name" placeholder="ชื่อเมนู" required>
