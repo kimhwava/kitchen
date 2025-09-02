@@ -36,6 +36,11 @@
 
 <main>
   <section>
+    <p style="color:#b00; font-weight:bold;">
+  !! หมายเหตุ: ราคาและส่วนผสมที่แสดงเป็นเพียงเพื่อการสาธิตเท่านั้น และไม่สะท้อนถึงมูลค่าที่แท้จริง<br>
+  !! Note: Prices and ingredients shown are for demonstration purposes only and do not reflect actual value.
+</p>
+
     <h2>➕ เพิ่มเมนู</h2>
     <form action="/add_menu" method="POST" onsubmit="return confirmAdd('เมนู')">
       <input type="text" name="name" placeholder="ชื่อเมนู" required>
@@ -170,14 +175,24 @@
 
   <section id="contact">
     <h2>📞 ติดต่อเรา</h2>
-    <p>โทร: 012-345-6789<br>อีเมล: info@nonlapong.com</p>
+    <p>โทร:<br>อีเมล:</p>
+
+    
    
   </section>
 </main>
 
-<footer class="foorpad">
-   <p>© 2025 ร้านอาหาร Nonlapong - พัฒนาโดยคุณ</p>
- <br>
+<footer class="foorpad" style="text-align: center;">
+   <small>
+    <a href="https://github.com/kimhwava/kitchen" target="_blank" rel="noopener noreferrer">
+      Open Source Dev
+    </a><br>
+    • ©2025 —
+    <a href="https://kawkong.net" target="_blank" title="ข้าวกล่อง">
+      https://kawkong.net
+    </a>
+  </small>
+<div style="height: 4rem;"></div>
 
 <div class="sticky-footer-nav">
 <button onclick="document.getElementById('menu-section').scrollIntoView({behavior:'smooth'})">📋 เพิ่มเมนู</button>
